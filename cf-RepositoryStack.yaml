@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Resources: 
+  TwitterDynamoDBTable: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - 
+          AttributeName: "Usuario"
+          AttributeType: "S"
+        - 
+          AttributeName: "Tags"
+          AttributeType: "S"
+        - 
+          AttributeName: "Posts"
+          AttributeType: "S"
+        - 
+          AttributeName: "Followers"
+          AttributeType: "N"
+      KeySchema: 
+        - 
+          AttributeName: "Usuario"
+          KeyType: "HASH"
+        - 
+          AttributeName: "Tags"
+          KeyType: "RANGE"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "TwitterData"
+      GlobalSecondaryIndexes: 
+        - 
+          IndexName: "myGSI"
+          KeySchema: 
+            - 
+              AttributeName: "Followers"
+              KeyType: "HASH"
+            - 
+              AttributeName: "Usuario"
+              KeyType: "RANGE"
+          Projection: 
+            NonKeyAttributes: 
+              - "Posts"
+              - "Tags"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+        - 
+          IndexName: "myGSI2"
+          KeySchema: 
+            - 
+              AttributeName: "Posts"
+              KeyType: "HASH"
+            - 
+              AttributeName: "Tags"
+              KeyType: "RANGE"
+          Projection: 
+            NonKeyAttributes: 
+              - "Usuario"
+              - "Followers"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+            
+  AgendamentoDynamoDBTable: 
+    Type: AWS::DynamoDB::Table
+    Properties: 
+      AttributeDefinitions: 
+        - 
+          AttributeName: "User"
+          AttributeType: "S"
+        - 
+          AttributeName: "Parametros"
+          AttributeType: "S"
+        - 
+          AttributeName: "Status"
+          AttributeType: "S"
+        - 
+          AttributeName: "NumeroExec"
+          AttributeType: "N"
+      KeySchema: 
+        - 
+          AttributeName: "User"
+          KeyType: "HASH"
+        - 
+          AttributeName: "Parametros"
+          KeyType: "RANGE"
+      ProvisionedThroughput: 
+        ReadCapacityUnits: "5"
+        WriteCapacityUnits: "5"
+      TableName: "AgendamentoData"
+      GlobalSecondaryIndexes: 
+        - 
+          IndexName: "myGSI"
+          KeySchema: 
+            - 
+              AttributeName: "Parametros"
+              KeyType: "HASH"
+            - 
+              AttributeName: "User"
+              KeyType: "RANGE"
+          Projection: 
+            NonKeyAttributes: 
+              - "Status"
+              - "NumeroExec"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
+        - 
+          IndexName: "myGSI2"
+          KeySchema: 
+            - 
+              AttributeName: "Status"
+              KeyType: "HASH"
+            - 
+              AttributeName: "NumeroExec"
+              KeyType: "RANGE"
+          Projection: 
+            NonKeyAttributes: 
+              - "User"
+              - "Parametros"
+            ProjectionType: "INCLUDE"
+          ProvisionedThroughput: 
+            ReadCapacityUnits: "5"
+            WriteCapacityUnits: "5"
