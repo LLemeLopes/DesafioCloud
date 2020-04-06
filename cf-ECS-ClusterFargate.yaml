@@ -1,0 +1,114 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Deploy AWS Fargate
+Parameters:
+  NetworkStackName:
+    Type: String
+    Description: Nome da stack de rede ja criada
+    Default : NetworkStack
+  
+  StackName:
+    Type: String
+    Description: Nome do ambiente que sera prefixo para os nomes dos recursos criados
+  
+  ServiceName:
+    Type: String
+    Description: Informar o nome da aplicacao
+    
+  ContainerPort:
+    Type: Number
+    Default: 80
+    Description: Qual numero da porta que a aplicacao fara binding dentro do Docker
+  
+  ContainerCpu:
+    Type: Number
+    Default: 256
+    Description: Quantidade de CPU para o Container. 1024 e 1 CPU
+  
+  ContainerMemory:
+    Type: Number
+    Default: 512
+    Description: Quantidade de memoria em megabytes para o Container
+  
+  Path:
+    Type: String
+    Default: "*"
+    Description: Um caminho no balanceador de carga que este serviço deve estar conectado. Use * para enviar todo o balanceador de carga tráfego para este serviço.
+      
+  DesiredCount:
+    Type: Number
+    Default: 2    
+  MinContainers:
+    Type: Number
+    Default: 1
+  # for autoscaling
+  MaxContainers:
+    Type: Number
+    Default: 10
+  # target CPU utilization (%)
+  AutoScalingTargetValue:
+    Type: Number
+    Default: 50
+  
+  ALBTgName:
+    Type: String
+    Description: O nome para o TargetGroup
+  
+  LoadBalancerIdleTimeout:
+    Description: 'O valor do tempo limite inativo, em segundos.'
+    Type: Number
+    Default: 60
+    MinValue: 1
+    MaxValue: 4000
+  
+    
+  
+Resources:
+  ALBSecurityGroup:
+    Type: 'AWS::EC2::SecurityGroup'
+    Properties:
+      GroupDescription: 'ecs-cluster-alb'
+      VpcId: {'Fn::ImportValue': !Sub '${NetworkStackName}-VPCID'}
+  ALBSecurityGroupInHttpWorld:
+    Type: 'AWS::EC2::SecurityGroupIngress'
+    Properties:
+      GroupId: !Ref ALBSecurityGroup
+      IpProtocol: tcp
+      FromPort: 80
+      ToPort: 8080
+      CidrIp: '0.0.0.0/0'
+  LoadBalancer:
+    Type: 'AWS::ElasticLoadBalancingV2::LoadBalancer'
+    Properties:
+      LoadBalancerAttributes:
+      - Key: 'idle_timeout.timeout_seconds'
+        Value: !Ref LoadBalancerIdleTimeout
+      - Key: 'routing.http2.enabled'
+        Value: 'true'
+      - Key: 'access_logs.s3.enabled'
+        Value: 'false'
+      Scheme: 'internal'
+      SecurityGroups:
+      - !Ref ALBSecurityGroup
+      Subnets:
+         - {'Fn::ImportValue': !Sub '${NetworkStackName}-AZ1'}
+         - {'Fn::ImportValue': !Sub '${NetworkStackName}-AZ2'}
+  
+  Cluster:
+    Type: AWS::ECS::Cluster
+    Properties:
+      ClusterName: !Ref 'StackName'
+      Tags:
+        - Key: Name
+          Value: !Ref 'StackName'
+          
+Outputs:
+  Cluster:
+    Description: A referencia a Cluster Criado
+    Value: !Ref Cluster
+    Export:
+      Name: !Sub "${AWS::StackName}-Cluster"
+  LoadBalancer:
+    Description: A referencia a LoadBalancer Criado
+    Value: !Ref LoadBalancer
+    Export:
+      Name: !Sub "${AWS::StackName}-LoadBalancer"
