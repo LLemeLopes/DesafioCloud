@@ -21,6 +21,7 @@ Parameters:
     Description: Informar o nome da aplicacao
     
   ImageUrl:
+    Default: hello-world
     Type: String
     Description: O URL de uma imagem do Docker que contém o processo de aplicativo que lidará com o tráfego para este serviço
     
