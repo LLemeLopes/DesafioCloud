@@ -220,10 +220,14 @@ Outputs:
   PublicSubnet1:
     Description: A referencia a subnet publica na primeira AZ
     Value: !Ref PublicSubnet1
+    Export:
+      Name: !Sub "${AWS::StackName}-PAZ1"
 
   PublicSubnet2:
     Description: A referencia a subnet publica na segunda AZ
     Value: !Ref PublicSubnet2
+    Export:
+      Name: !Sub "${AWS::StackName}-PAZ2"
 
   PrivateSubnet1:
     Description: A referencia a subnet privada na primeira AZ
